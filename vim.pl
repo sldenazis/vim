@@ -2,7 +2,7 @@
 
 ##  @Author: Santiago López Denazis
 ##    @Date: 2013/01/22
-## @Version: 0.1
+## @Version: 0.2
 
 use strict;
 use warnings;
@@ -162,7 +162,6 @@ sub run_vim {
 
 	return 0;
 }
-
 
 my @script_args = @ARGV;
 my($vim_args, @files_to_edit) = parse_args(@script_args);
