@@ -5,22 +5,22 @@
 ## @Version: 0.1
 
 use strict;
-use Switch;
+use warnings;
 use POSIX qw/strftime/;
 
 sub parse_args {
 	## Devuelve los parámetros de vim y los ficheros por separado
 	## Si los ficheros son nuevos, se devuelven dentro de $vim_args
 	my @parametros = @_;
-	my $vim_args;
+	my $vim_args = "";
 	my @files_to_edit;
 	my $file_index = 0;
 	my $aux_option;
 	
 	while (@parametros) {
-		$aux_option = @parametros[0];
+		$aux_option = $parametros[0];
 		if ( -f $aux_option ) {
-			@files_to_edit[$file_index] = $aux_option;
+			$files_to_edit[$file_index] = $aux_option;
 			$file_index = $file_index + 1;
 		} else {
 			if ( "$aux_option" ne "-S" ) {
@@ -36,7 +36,7 @@ sub parse_args {
 				} else {
 					$vim_args = "$vim_args $aux_option";
 				}
-				$vim_args = "$vim_args @parametros[0]";
+				$vim_args = "$vim_args $parametros[0]";
 			}
 		}
 		shift(@parametros);
@@ -74,7 +74,10 @@ sub get_file_properties {
 
 sub backup_file {
 	## Devuelve nombre absoluto del fichero de backup
-	use File::Path qw/make_path/;
+	# Por una cuestión de compatibilidad, versiones viejas de File::Path
+	# no tienen make_path, hay que usar mkpath en su lugar
+	#use File::Path qw/make_path/;
+	use File::Path qw/mkpath/;
 	use File::Copy;
 	my $file_to_bkp = shift;
 
@@ -97,7 +100,8 @@ sub backup_file {
 	} else {
 		# Uso make_path() en lugar de mkdir() ya que make_path puede crear una estructura
 		# completa de directorios (como el mkdir -p de bash)
-		make_path($backup_dir);
+		#make_path($backup_dir);
+		mkpath($backup_dir);
 	}
 
 	return $backup_file;
@@ -105,6 +109,27 @@ sub backup_file {
 
 sub comment_file {
 	my $file_to_commit = shift;
+	my $version_anterior = shift;
+	my @file_properties = get_file_properties($file_to_commit);
+
+	if ( "$file_properties[2]" eq ".sh" or "$file_properties[2]" eq ".php" ) {
+		my $user_login = getlogin;
+		my $fecha_modificacion = strftime "%d del %m de %Y", localtime;
+
+		print("[$file_to_commit] Comentario (autor, descripcion, etc): ");
+		my $comentario = <STDIN>;
+
+		open(FICHERO, ">>$file_to_commit");
+
+		print FICHERO "\n## Fecha de modificación: $fecha_modificacion\n";
+		print FICHERO "## Modificado por: $user_login\n";
+		print FICHERO "## Versión anterior: $version_anterior\n";
+		print FICHERO "## Comentario: $comentario";
+
+		close(FICHERO);
+	}
+
+	return;
 }
 
 sub run_vim {
@@ -113,20 +138,22 @@ sub run_vim {
 	my @files_to_edit = @_;
 	my $file_index = 0;
 	my @backup_files;
-	my $backup_index = 0;
 	my $file_to_backup;
 
+	# Me guardo los ficheros de backup en un array
 	foreach $file_to_backup (@files_to_edit) {
-		@backup_files[$backup_index] = backup_file($file_to_backup);
-		$backup_index = $backup_index + 1;
+		$backup_files[$file_index] = backup_file($file_to_backup);
+		$file_index = $file_index + 1;
 	}
 
 	system("$vim_binary $vim_args @files_to_edit");
 
+	$file_index = 0;
 	foreach $file_to_backup (@backup_files) {
-		if ( md5_check_file($file_to_backup) ne md5_check_file(@files_to_edit[$file_index]) ) {
-			print "Se ha modificado el fichero!\n";
-			## Llamar a funcion de comentarios!
+		if ( md5_check_file($file_to_backup) ne md5_check_file($files_to_edit[$file_index]) ) {
+			comment_file($files_to_edit[$file_index], $file_to_backup);
+			## Mensaje de debug
+			print("Se ha modificado el fichero $files_to_edit[$file_index]!\n");
 		} else {
 			unlink($file_to_backup);
 		}
