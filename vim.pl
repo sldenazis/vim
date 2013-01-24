@@ -14,6 +14,7 @@ sub trap_signals {
 
 $SIG{INT} = \&trap_signals;
 $SIG{TERM} = \&trap_signals;
+$SIG{TSTP} = \&trap_signals;
 
 sub parse_args {
 	## Devuelve los parámetros de vim y los ficheros por separado
