@@ -8,6 +8,13 @@ use strict;
 use warnings;
 use POSIX qw/strftime/;
 
+sub trap_signals {
+	return;
+}
+
+$SIG{INT} = \&trap_signals;
+$SIG{TERM} = \&trap_signals;
+
 sub parse_args {
 	## Devuelve los parámetros de vim y los ficheros por separado
 	## Si los ficheros son nuevos, se devuelven dentro de $vim_args
