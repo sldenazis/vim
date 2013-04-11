@@ -17,6 +17,7 @@ set number
 set t_Co=256
 colo molokai
 
+" Opciones para gvim
 if has("gui_running")
 	" Sin barra de herramientas
 	set guioptions-=T
