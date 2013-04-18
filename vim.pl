@@ -161,7 +161,7 @@ sub run_vim {
 		if ( md5_check_file($file_to_backup) ne md5_check_file($files_to_edit[$file_index]) ) {
 			comment_file($files_to_edit[$file_index], $file_to_backup);
 			## Mensaje de debug
-			print("Se ha modificado el fichero $files_to_edit[$file_index]!\n");
+			## print("Se ha modificado el fichero $files_to_edit[$file_index]!\n");
 		} else {
 			unlink($file_to_backup);
 		}
