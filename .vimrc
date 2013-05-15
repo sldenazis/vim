@@ -1,6 +1,6 @@
 "  Author: Santiago Lopez Denazis (SLD)
-" Version: 0.03
-" Updated: 2013/05/18
+" Version: 0.04
+" Updated: 2013/05/15
 " Licence: +GPLv3
 
 " <Autocompletado>
@@ -30,15 +30,26 @@ if has("gui_running")
 endif
 
 " <Plegado de código!>
-set foldmethod=indent
+set foldmethod=syntax " basado en sintaxis
 set foldnestmax=10
+set foldlevelstart=1
 set nofoldenable
 set foldlevel=1
+
+" Habilito el plegado para varios lenguajes
+let javaScript_fold=1		" JavaScript
+let perl_fold=1				" Perl
+let php_folding=1			" PHP
+let r_syntax_folding=1		" R
+let ruby_fold=1				" Ruby
+let sh_fold_enabled=1		" sh
+let vimsyn_folding='af'		" Vim script
+let xml_syntax_folding=1	" XML
 
 " <tabs, indentado, etc>
 set ts=4
 set autoindent
-set smartindent
+" set smartindent
 set number
 syntax on
 
