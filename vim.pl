@@ -1,8 +1,8 @@
 #!/usr/bin/perl
 
-##  @Author: Santiago López Denazis
-##    @Date: 2013/01/22
-## @Version: 0.2
+##  @Author: Santiago Lopez Denazis <sldenazis at gmail dot com>
+##    @Date: 2013/05/15
+## @Version: 0.3
 
 use strict;
 use warnings;
@@ -17,7 +17,7 @@ $SIG{TERM} = \&trap_signals;
 $SIG{TSTP} = \&trap_signals;
 
 sub parse_args {
-	## Devuelve los parámetros de vim y los ficheros por separado
+	## Devuelve los parametros de vim y los ficheros por separado
 	## Si los ficheros son nuevos, se devuelven dentro de $vim_args
 	my @parametros = @_;
 	my $vim_args = "";
@@ -54,7 +54,7 @@ sub parse_args {
 }
 
 sub md5_check_file {
-	## Devuelve md5sum del fichero pasado como parámetro
+	## Devuelve md5sum del fichero pasado como parametro
 	use Digest::MD5;
 	my $check_file = shift;
 	
@@ -68,7 +68,7 @@ sub md5_check_file {
 }
 
 sub get_file_properties {
-	## Devuelve array con nombre, path y extensión del fichero pasado como parámetro
+	## Devuelve array con nombre, path y extension del fichero pasado como parametro
 	use File::Basename;
 	my $file_to_edit = shift;
 	my @exts = (".txt", ".sh", ".php", ".html", ".pl", ".py");
@@ -89,7 +89,7 @@ sub backup_file {
 	use File::Copy;
 	my $file_to_bkp = shift;
 
-	# Usuario que se logueó, como $(logname)
+	# Usuario que se ha logueado, como $(logname)
 	my $user_login = getlogin;
 	# Usuario que ejecuta, como $(whoami)
 	my $user_run = getpwuid($>);
@@ -103,14 +103,14 @@ sub backup_file {
 	my $backup_file = "$backup_dir/$file_properties[0]$file_properties[2].$user_login.$hora_modificacion";
 
 	# Si no existe el directorio se crea
-	if ( -d $backup_dir ) {
-		copy($file_to_bkp, $backup_file);
-	} else {
+	if ( ! -d $backup_dir ) {
 		# Uso make_path() en lugar de mkdir() ya que make_path puede crear una estructura
 		# completa de directorios (como el mkdir -p de bash)
-		#make_path($backup_dir);
+		# mkpath por make_path por el comentario mas arriba
 		mkpath($backup_dir);
 	}
+
+	copy($file_to_bkp, $backup_file);
 
 	return $backup_file;
 }
@@ -120,7 +120,7 @@ sub comment_file {
 	my $version_anterior = shift;
 	my @file_properties = get_file_properties($file_to_commit);
 
-	if ( "$file_properties[2]" eq ".sh" or "$file_properties[2]" eq ".php" ) {
+	if ( "$file_properties[2]" eq ".sh" ) {
 		my $user_login = getlogin;
 		my $fecha_modificacion = strftime "%d del %m de %Y", localtime;
 
@@ -160,8 +160,6 @@ sub run_vim {
 	foreach $file_to_backup (@backup_files) {
 		if ( md5_check_file($file_to_backup) ne md5_check_file($files_to_edit[$file_index]) ) {
 			comment_file($files_to_edit[$file_index], $file_to_backup);
-			## Mensaje de debug
-			print("Se ha modificado el fichero $files_to_edit[$file_index]!\n");
 		} else {
 			unlink($file_to_backup);
 		}
