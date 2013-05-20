@@ -1,8 +1,13 @@
 #!/usr/bin/perl
 
-##  @Author: Santiago Lopez Denazis <sldenazis at gmail dot com>
-##    @Date: 2013/05/15
-## @Version: 0.3
+##    Author: Santiago Lopez Denazis
+##      Date: 2013/05/20
+##   Version: 0.5
+## Changelog:
+##           v.0.2: solo comento los .sh (ya no mas los php)
+##           v.0.3: corregido bug del primer backup del dia (ticket #3262)
+##           v.0.4: ya no capturo TSTP (para poder mandar el proceso a segundo plano, #3262 too)
+##           v.0.5: si no se puede escribir en /vim, guardo backups en ~/.vim/backups/ (#3262)
 
 use strict;
 use warnings;
@@ -14,7 +19,6 @@ sub trap_signals {
 
 $SIG{INT} = \&trap_signals;
 $SIG{TERM} = \&trap_signals;
-$SIG{TSTP} = \&trap_signals;
 
 sub parse_args {
 	## Devuelve los parametros de vim y los ficheros por separado
@@ -59,6 +63,7 @@ sub md5_check_file {
 	my $check_file = shift;
 	
 	open(CHECK_FILE, $check_file) or die("No se pudo calcular la suma md5 del fichero $check_file");
+
 	my $md5_file = Digest::MD5->new;
 	$md5_file->addfile(*CHECK_FILE);
 	my $hex_md5_file = $md5_file->hexdigest;
@@ -82,14 +87,14 @@ sub get_file_properties {
 
 sub backup_file {
 	## Devuelve nombre absoluto del fichero de backup
-	# Por una cuestión de compatibilidad, versiones viejas de File::Path
+	# Por una cuestion de compatibilidad, versiones viejas de File::Path
 	# no tienen make_path, hay que usar mkpath en su lugar
 	#use File::Path qw/make_path/;
 	use File::Path qw/mkpath/;
 	use File::Copy;
 	my $file_to_bkp = shift;
 
-	# Usuario que se ha logueado, como $(logname)
+	# Usuario que se logueo, como $(logname)
 	my $user_login = getlogin;
 	# Usuario que ejecuta, como $(whoami)
 	my $user_run = getpwuid($>);
@@ -99,14 +104,30 @@ sub backup_file {
 	
 	my @file_properties = get_file_properties($file_to_bkp);
 
-	my $backup_dir = "/vim/$user_run/$fecha_hoy";
+	## Defino directorio de backups
+	my $root_backup_dir = "/vim";
+	my $backup_dir = "$root_backup_dir/$user_run/$fecha_hoy";
+
+	## Si no soy root y no existe /vim (o no tengo permisos para escribir), guardo los backups en
+	## en un directorio oculto del home del usuario.
+	if ( $user_run ne "root" ) {
+		if ( ! -d "$root_backup_dir" or ! -w "$root_backup_dir" ) {
+			$backup_dir = "$ENV{'HOME'}/.vim/backups/$fecha_hoy";
+		}
+	} else {
+		if ( ! -d $root_backup_dir ) {
+			mkpath($root_backup_dir);
+			my $perm_dir_backups=0777;
+			chmod $perm_dir_backups, $root_backup_dir;
+		}
+	}
+
 	my $backup_file = "$backup_dir/$file_properties[0]$file_properties[2].$user_login.$hora_modificacion";
 
 	# Si no existe el directorio se crea
 	if ( ! -d $backup_dir ) {
 		# Uso make_path() en lugar de mkdir() ya que make_path puede crear una estructura
 		# completa de directorios (como el mkdir -p de bash)
-		# mkpath por make_path por el comentario mas arriba
 		mkpath($backup_dir);
 	}
 
@@ -120,18 +141,19 @@ sub comment_file {
 	my $version_anterior = shift;
 	my @file_properties = get_file_properties($file_to_commit);
 
+	## Comento el file si es un .sh
 	if ( "$file_properties[2]" eq ".sh" ) {
 		my $user_login = getlogin;
-		my $fecha_modificacion = strftime "%d del %m de %Y", localtime;
+		my $fecha_modificacion = strftime "%D-%T", localtime;
 
 		print("[$file_to_commit] Comentario (autor, descripcion, etc): ");
 		my $comentario = <STDIN>;
 
 		open(FICHERO, ">>$file_to_commit");
 
-		print FICHERO "\n## Fecha de modificación: $fecha_modificacion\n";
+		print FICHERO "\n## Fecha de modificacion: $fecha_modificacion\n";
 		print FICHERO "## Modificado por: $user_login\n";
-		print FICHERO "## Versión anterior: $version_anterior\n";
+		print FICHERO "## Version anterior: $version_anterior\n";
 		print FICHERO "## Comentario: $comentario";
 
 		close(FICHERO);
@@ -141,14 +163,14 @@ sub comment_file {
 }
 
 sub run_vim {
-	my $vim_binary = "/usr/bin/vim";
+	my $vim_binary = "/usr/bin/vimi";
 	my $vim_args = shift;
 	my @files_to_edit = @_;
 	my $file_index = 0;
 	my @backup_files;
 	my $file_to_backup;
 
-	# Me guardo los ficheros de backup en un array
+	# Respaldo todos los ficheros a editar
 	foreach $file_to_backup (@files_to_edit) {
 		$backup_files[$file_index] = backup_file($file_to_backup);
 		$file_index = $file_index + 1;
@@ -158,9 +180,11 @@ sub run_vim {
 
 	$file_index = 0;
 	foreach $file_to_backup (@backup_files) {
+		## Si hubo cambios, llamo a la function de comentarios
 		if ( md5_check_file($file_to_backup) ne md5_check_file($files_to_edit[$file_index]) ) {
 			comment_file($files_to_edit[$file_index], $file_to_backup);
 		} else {
+			## Si no hubo cambios, elimino el backup
 			unlink($file_to_backup);
 		}
 		$file_index = $file_index + 1;
