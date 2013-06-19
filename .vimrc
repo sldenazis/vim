@@ -1,6 +1,6 @@
 " Author: Santiago Lopez Denazis (SLD)
-" Version: 0.04
-" Updated: 2013/05/15
+" Version: 0.05
+" Updated: 2013/06/19
 " Licence: +GPLv3
 
 " <Autocompletado>
@@ -21,6 +21,12 @@ ia #P #!/bin/env perl
 " <Theme>
 set t_Co=256
 colo molokai
+
+" <Pathogen>
+filetype off " Pathogen needs to run before plugin indent on
+call pathogen#runtime_append_all_bundles()
+call pathogen#helptags() " generate helptags for everything in 'runtimepath'
+filetype plugin indent on
 
 " <Gvim>
 if has("gui_running")
