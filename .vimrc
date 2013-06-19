@@ -33,6 +33,9 @@ filetype plugin indent on
 if has("gui_running")
 	" Sin barra de herramientas
 	set guioptions-=T
+	" Sin scrollbars!
+	set guioptions+=LlRrb
+	set guioptions-=LlRrb
 	set number
 endif
 
@@ -85,6 +88,10 @@ if has('statusline')
 	set statusline+=\[A=\%03.3b/H=\%02.2B] " ASCII/Hexadecimal value of char
 	set statusline+=%=%-14.(%l,%c%V%)\%p%% " Right aligned file nav info
 endif
+
+" NERDTree a la derecha
+let g:NERDTreeWinPos = "right"
+let g:NERDTreeWinSize = 25
 
 " Pathogen
 " execute pathogen#infect()
