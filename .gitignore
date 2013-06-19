@@ -1,11 +1,11 @@
 ## Ignoro los plugins
-bundle
+.vim/bundle/*
 
 ## Temporales del vim
-.swp
+*.swp
 
 ## Binarios si es que hay
-.out
-.bin
-.exe
-.run
+*.out
+*.bin
+*.exe
+*.run
