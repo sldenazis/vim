@@ -24,7 +24,8 @@ colo molokai
 
 " <Pathogen>
 filetype off " Pathogen needs to run before plugin indent on
-call pathogen#runtime_append_all_bundles()
+" call pathogen#runtime_append_all_bundles(), al parecer esta obsoleto
+call pathogen#incubate()
 call pathogen#helptags() " generate helptags for everything in 'runtimepath'
 filetype plugin indent on
 
@@ -46,10 +47,10 @@ set foldlevel=1
 let javaScript_fold=1		" JavaScript
 let perl_fold=1				" Perl
 let php_folding=1			" PHP
-let r_syntax_folding=1		" R
-let ruby_fold=1				" Ruby
+" let r_syntax_folding=1		" R
+" let ruby_fold=1				" Ruby
 let sh_fold_enabled=1		" sh
-let vimsyn_folding='af'		" Vim script
+" let vimsyn_folding='af'		" Vim script
 let xml_syntax_folding=1	" XML
 
 " <tabs, indentado, etc>
@@ -78,10 +79,10 @@ if has('statusline')
 	" Broken down into easily includeable segments
 	set statusline=%<%f\ " Filename
 	set statusline+=%w%h%m%r " Options
-	" set statusline+=%{fugitive#statusline()} " Git Hotness, plugin 'fugitive'
+	set statusline+=%{fugitive#statusline()} " Git Hotness, plugin 'fugitive'
 	set statusline+=\[%{&ff}/%Y] " filetype
 	set statusline+=\[%{getcwd()}] " current dir
-	" set statusline+=\[A=\%03.3b/H=\%02.2B] " ASCII/Hexadecimal value of char
+	set statusline+=\[A=\%03.3b/H=\%02.2B] " ASCII/Hexadecimal value of char
 	set statusline+=%=%-14.(%l,%c%V%)\%p%% " Right aligned file nav info
 endif
 
