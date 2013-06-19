@@ -15,8 +15,8 @@ ia forc for( i=0; i<; i++ ){}
 " <Scripting>
 ia #s #!/bin/sh
 ia #b #!/bin/bash
-ia #p #!/usr/bin/bin/python
-ia #P #!/usr/bin/perl
+ia #p #!/bin/env python
+ia #P #!/bin/env perl
 
 " <Theme>
 set t_Co=256
@@ -24,9 +24,9 @@ colo molokai
 
 " <Gvim>
 if has("gui_running")
-" Sin barra de herramientas
-set guioptions-=T
-set number
+	" Sin barra de herramientas
+	set guioptions-=T
+	set number
 endif
 
 " <Plegado de código!>
