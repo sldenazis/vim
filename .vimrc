@@ -1,9 +1,9 @@
-" Author: Santiago Lopez Denazis (SLD)
-" Version: 0.05
-" Updated: 2013/06/19
-" Licence: +GPLv3
+" Author: Santiago Lopez Denazis ~ sld
+" Version: 0.06
+" Updated: 2013/10/29
+" Licence: same as vim
 
-" <Autocompletado>
+" <Autocomplete>
 " <Bash>
 ia ifb if [ ]; then
 ia whileb while [ ]; do
@@ -27,48 +27,48 @@ filetype off " Pathogen needs to run before plugin indent on
 " call pathogen#runtime_append_all_bundles(), al parecer esta obsoleto
 call pathogen#incubate()
 call pathogen#helptags() " generate helptags for everything in 'runtimepath'
-filetype plugin indent on
 
 " <Gvim>
 if has("gui_running")
-	" Sin barra de herramientas
+	" Without toolbar
 	set guioptions-=T
-	" Sin scrollbars!
+	" Without scrollbars!
 	set guioptions+=LlRrb
 	set guioptions-=LlRrb
-	set number
 endif
 
-" <Plegado de código!>
-set foldmethod=syntax " basado en sintaxis
+" i<Syntax>
+syntax on
+syntax sync minlines=100
+syntax sync maxlines=200
+
+
+" <Folding>
+set foldmethod=syntax
 set foldnestmax=10
 set foldlevelstart=1
 set nofoldenable
 set foldlevel=1
+" Enable floding level for some languages
+let javaScript_fold=1       " JavaScript
+let perl_fold=1             " Perl
+let php_folding=1           " PHP
+" let r_syntax_folding=1    " R
+" let ruby_fold=1           " Ruby
+let sh_fold_enabled=7       " sh: XXX based on functions and if/for/while/case
+" let vimsyn_folding='af'   " Vim script
+let xml_syntax_folding=1    " XML
 
-" Habilito el plegado para varios lenguajes
-let javaScript_fold=1		" JavaScript
-let perl_fold=1				" Perl
-let php_folding=1			" PHP
-" let r_syntax_folding=1		" R
-" let ruby_fold=1				" Ruby
-let sh_fold_enabled=1		" sh
-" let vimsyn_folding='af'		" Vim script
-let xml_syntax_folding=1	" XML
-
-" <tabs, indentado, etc>
+" <Misc>
 set ts=4
 set autoindent
 " set smartindent
-set number
-syntax on
-
-" <Varios>
+set nonumber " yep, it's default in gentoo
 set showcmd	" display incomplete commands
 set encoding=utf-8
-" filetype plugin indent on
 set wrap
-" set expandtab " esta opcion usa espacios en lugar de tabs
+set textwidth=0
+" set expandtab " use spaces instead of tabs
 
 " <Busquedas>
 set hlsearch	" colorea los matches
@@ -89,9 +89,10 @@ if has('statusline')
 	set statusline+=%=%-14.(%l,%c%V%)\%p%% " Right aligned file nav info
 endif
 
-" NERDTree a la derecha
+" NERDTree in right of screen
 let g:NERDTreeWinPos = "right"
-let g:NERDTreeWinSize = 25
+let g:NERDTreeWinSize = 30 " 30 with 23' display
 
 " Pathogen
 " execute pathogen#infect()
+set modeline
